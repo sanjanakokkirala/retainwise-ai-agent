@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>RetainWise – Employee Attrition Root-Cause Intelligence</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--tx:#1b2030;--mu:#667;--ac:#1d4ed8;--g:#15803d;--r:#b91c1c;--bd:#e3e6ef;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12141c;--card:#1b1f2b;--tx:#e8eaf3;--mu:#9aa1b5;--ac:#60a5fa;--g:#4ade80;--r:#f87171;--bd:#2b3142;color-scheme:dark}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;padding:16px}
+.w{max-width:1000px;margin:auto}h1{margin:0;font-size:24px}.sub{color:var(--mu);margin:2px 0 14px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:14px}
+h2{font-size:16px;margin:0 0 8px}.kp{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.k{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px 12px}.k b{display:block;font-size:20px}.k span{color:var(--mu);font-size:12px}
+.sc{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:620px;font-size:13px}th,td{padding:7px 8px;border-bottom:1px solid var(--bd);text-align:right}th:first-child,td:first-child{text-align:left}th{color:var(--mu);font-weight:600}td.l,th.l{text-align:left}
+.dr{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:13px}.dr>span{width:190px;flex:none}.dr i{display:block;height:10px;border-radius:5px}.dr small{white-space:nowrap}
+input[type=text]{flex:1;min-width:160px;padding:8px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit}
+button{background:var(--ac);color:#fff;border:0;border-radius:8px;padding:8px 14px;font:inherit;cursor:pointer}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.ag p{margin:6px 0;padding:8px 10px;border-radius:8px;background:var(--bg);border-left:3px solid var(--ac)}
+.g{color:var(--g)}.r{color:var(--r)}small{color:var(--mu)}
+</style></head><body><div class="w">
+<h1>RetainWise</h1>
+<div class="sub">Employee attrition root-cause intelligence · Demo company: Infosys-style IT services firm · 500 synthetic employees, ₹ lakh</div>
+<div class="kp" id="kp"></div>
+
+<div class="card"><h2>1 · What drives attrition (learned by the model)</h2><div id="dv"></div><small>Bars show the model’s learned effect of each factor. Red raises attrition risk, green lowers it. Each bar is a one-standard-deviation change.</small></div>
+
+<div class="card"><h2>2 · Where the problem is concentrated</h2><div class="sc"><table id="dp"></table></div></div>
+
+<div class="card"><h2>3 · Retention interventions ranked by return</h2><div class="sc"><table id="iv"></table></div><small>Each intervention is simulated on the current employees: the model re-scores them after the change, and savings = leavers avoided × replacement cost (1.5× annual salary).</small></div>
+
+<div class="card"><h2>4 · Highest-priority at-risk employees</h2><div class="sc"><table id="ar"></table></div></div>
+
+<div class="card ag"><h2>5 · RetainWise AI agent</h2><div id="ag"></div>
+<div class="row" style="margin-top:8px"><input type="text" id="q" placeholder="Ask: why are people leaving? what should HR do first?"><button id="ask">Ask</button></div><div id="ans"></div></div>
+
+<div class="card"><h2>How it works (algorithm)</h2><small>1) Integrate HRIS, performance, payroll, attendance, overtime, engagement survey and training data → 2) Engineer features (compa-ratio, overtime, absenteeism, engagement, training hours, tenure, performance, time since promotion) → 3) Train an attrition model (logistic regression here; gradient boosting + SHAP or survival analysis in production) → 4) Rank drivers by learned effect → 5) Find hotspots by department and the main driver in each → 6) Simulate interventions on current employees and compute savings against cost → 7) Recommend evidence-based actions and re-train quarterly. Correlation is not proof of cause, so pilot interventions and measure them.</small></div>
+</div>
+<script>
+function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const R=rng(21),gs=()=>Math.sqrt(-2*Math.log(R()+1e-9))*Math.cos(6.2832*R()),cl=(v,a,b)=>Math.min(b,Math.max(a,v)),sg=x=>1/(1+Math.exp(-x));
+const DP=[["Engineering",.35,9,.2,10],["Sales",.2,8,.3,8],["Support",.25,11,.5,5],["Finance",.1,5,-.2,9],["HR",.1,4,-.2,7]];
+const E=[];for(let i=0;i<500;i++){let r=R(),a=0,s=0;for(;a<4;a++){s+=DP[a][1];if(r<s)break}const d=DP[a];
+ const e={id:"E-"+(2001+i),dept:d[0],tenure:cl(Math.abs(4+4*gs()),.2,15),perf:Math.round(cl(3.2+.9*gs(),1,5)),ot:cl(d[2]+3.5*gs(),0,22),abs:cl(6+3*gs(),0,20),comp:cl(1+.11*gs(),.72,1.3),eng:cl(6.2+1.6*gs()-(d[0]=="Support"?.8:0),1,10),train:cl(26+12*gs(),0,60),promo:cl(Math.abs(2+1.8*gs()),0,7),market:d[4]*(.7+.6*R())};
+ e.sal=e.comp*e.market;const z=-1.9+d[3]-3.6*(e.comp-1)-.45*(e.eng-6)+.12*(e.ot-6)+.09*(e.abs-6)-.025*(e.train-26)+.17*e.promo-.05*e.tenure+(e.perf>=4&&e.comp<.95?.8:0);e.left=R()<sg(z);E.push(e)}
+const FK=["comp","eng","ot","abs","train","tenure","perf","promo"],NM={comp:"Pay vs market (compa-ratio)",eng:"Engagement score",ot:"Weekly overtime hours",abs:"Absenteeism days",train:"Training hours",tenure:"Tenure",perf:"Performance rating",promo:"Years since promotion"};
+const mu=FK.map(k=>E.reduce((s,e)=>s+e[k],0)/E.length),sd=FK.map((k,j)=>Math.sqrt(E.reduce((s,e)=>s+(e[k]-mu[j])**2,0)/E.length));
+const zv=e=>FK.map((k,j)=>(e[k]-mu[j])/sd[j]);
+let W=FK.map(()=>0),B=0;const Z=E.map(zv);
+for(let it=0;it<600;it++){const gw=FK.map(()=>0);let gb=0;E.forEach((e,i)=>{const p=sg(B+Z[i].reduce((s,v,j)=>s+v*W[j],0)),er=p-(e.left?1:0);gb+=er;Z[i].forEach((v,j)=>gw[j]+=er*v)});B-=.4*gb/E.length;W=W.map((w,j)=>w-.4*(gw[j]/E.length+.01*w))}
+const pr=e=>sg(B+zv(e).reduce((s,v,j)=>s+v*W[j],0));
+E.forEach(e=>{e.p=pr(e);e.c=zv(e).map((v,j)=>v*W[j])});
+const f=(v,d=0)=>v.toLocaleString("en-IN",{maximumFractionDigits:d,minimumFractionDigits:d});
+const L=E.filter(e=>e.left),AC=E.filter(e=>!e.left);
+let auc=0;{let c=0;L.forEach(a=>AC.forEach(b=>{c+=a.p>b.p?1:a.p==b.p?.5:0}));auc=c/(L.length*AC.length)}
+const COSTL=L.reduce((s,e)=>s+1.5*e.sal,0);
+const DRV=FK.map((k,j)=>({k,w:W[j]})).sort((a,b)=>b.w-a.w);
+const IV=[["Market pay correction","Raise anyone below 95% of market to 95%",e=>e.comp<.95,e=>({...e,comp:.95}),e=>(.95-e.comp)*e.market],
+["Overtime cap and workload rebalancing","Cap overtime at 8 hours per week via hiring and task redistribution",e=>e.ot>8,e=>({...e,ot:8}),e=>.4],
+["Manager and engagement program","Manager coaching, stay interviews and recognition (+1.5 engagement)",e=>e.eng<6,e=>({...e,eng:Math.min(10,e.eng+1.5)}),e=>.15],
+["Career path and promotion review","Review anyone waiting more than 3 years for promotion",e=>e.promo>3,e=>({...e,promo:2}),e=>.5],
+["Upskilling and learning budget","Guarantee at least 30 training hours per year",e=>e.train<30,e=>({...e,train:30}),e=>.1]];
+const IR=IV.map(v=>{const t=AC.filter(v[2]);let sav=0,cost=0,av=0;t.forEach(e=>{const d=e.p-pr(v[3](e));av+=d;sav+=d*1.5*e.sal;cost+=v[4](e)});return{n:v[0],d:v[1],cnt:t.length,av,sav,cost,net:sav-cost,roi:cost?sav/cost:0}}).sort((a,b)=>b.net-a.net);
+const DT=DP.map(d=>{const m=E.filter(e=>e.dept==d[0]),a=m.filter(e=>e.left);const c=FK.map((_,j)=>m.reduce((s,e)=>s+e.c[j],0)/m.length);const top=c.map((v,j)=>[v,j]).sort((x,y)=>y[0]-x[0])[0][1];
+ const av=k=>m.reduce((s,e)=>s+e[k],0)/m.length;return{n:d[0],hc:m.length,at:a.length/m.length,ot:av("ot"),eng:av("eng"),comp:av("comp"),top:NM[FK[top]]}}).sort((a,b)=>b.at-a.at);
+const AR=AC.filter(e=>e.p>=.4).sort((a,b)=>b.p*b.sal-a.p*a.sal);
+const ACT={comp:"Pay correction",eng:"Stay interview + manager coaching",ot:"Workload rebalancing",abs:"Wellbeing check-in",train:"Learning plan",tenure:"Early-tenure mentoring",perf:"Career conversation",promo:"Promotion review"};
+function render(){document.getElementById("kp").innerHTML=[["Headcount",E.length],["Attrition rate",f(L.length/E.length*100,1)+"%"],["Cost of attrition","₹"+f(COSTL)+" L"],["Model AUC",f(auc,2)],["Active employees at risk",AR.length]].map(a=>`<div class="k"><span>${a[0]}</span><b>${a[1]}</b></div>`).join("");
+ const m=Math.max(...DRV.map(d=>Math.abs(d.w)));
+ document.getElementById("dv").innerHTML=DRV.map(d=>`<div class="dr"><span>${NM[d.k]}</span><i style="width:${Math.abs(d.w)/m*220}px;background:${d.w>0?"var(--r)":"var(--g)"}"></i><small>odds ×${f(Math.exp(d.w),2)} per SD</small></div>`).join("");
+ document.getElementById("dp").innerHTML="<tr><th>Department</th><th>Headcount</th><th>Attrition</th><th>Avg overtime</th><th>Avg engagement</th><th>Pay vs market</th><th class=l>Main driver</th></tr>"+DT.map(d=>`<tr><td>${d.n}</td><td>${d.hc}</td><td class="${d.at>L.length/E.length*1.15?"r":""}">${f(d.at*100,1)}%</td><td>${f(d.ot,1)} h</td><td>${f(d.eng,1)}</td><td>${f(d.comp*100)}%</td><td class="l">${d.top}</td></tr>`).join("");
+ document.getElementById("iv").innerHTML="<tr><th>Intervention</th><th>Employees targeted</th><th>Leavers avoided</th><th>Savings (₹L)</th><th>Cost (₹L)</th><th>Net (₹L)</th></tr>"+IR.map(v=>`<tr><td class="l" style="text-align:left"><b>${v.n}</b><br><small>${v.d}</small></td><td>${v.cnt}</td><td>${f(v.av,1)}</td><td>${f(v.sav,1)}</td><td>${f(v.cost,1)}</td><td class="${v.net>0?"g":"r"}"><b>${f(v.net,1)}</b></td></tr>`).join("");
+ document.getElementById("ar").innerHTML="<tr><th>Employee</th><th>Department</th><th>Risk</th><th>Salary (₹L)</th><th class=l>Top drivers</th><th class=l>Suggested action</th></tr>"+AR.slice(0,12).map(e=>{const t=e.c.map((v,j)=>[v,j]).sort((a,b)=>b[0]-a[0]).slice(0,2);return`<tr><td>${e.id}</td><td>${e.dept}</td><td class="r">${f(e.p*100)}%</td><td>${f(e.sal,1)}</td><td class="l" style="text-align:left">${t.map(x=>NM[FK[x[1]]]).join(", ")}</td><td class="l" style="text-align:left">${ACT[FK[t[0][1]]]}</td></tr>`}).join("");
+ const w=DT[0],ti=IR[0],dd=DRV[0];
+ document.getElementById("ag").innerHTML=`<p><b>Root cause:</b> the strongest attrition drivers are ${DRV.slice(0,3).map(d=>NM[d.k].toLowerCase()).join(", ")}.</p><p><b>Hotspot:</b> ${w.n} loses ${f(w.at*100,1)}% of staff; its main driver is ${w.top.toLowerCase()}.</p><p><b>Best intervention:</b> ${ti.n} avoids about ${f(ti.av,1)} leavers and nets ₹${f(ti.net,1)} L after cost. Start there, then pilot the next two and measure results.</p>`}
+function ans(t){t=t.toLowerCase();
+ if(/why|cause|driver|reason/.test(t))return "Top drivers: "+DRV.slice(0,4).map(d=>NM[d.k]+" (odds ×"+f(Math.exp(d.w),2)+")").join(", ")+".";
+ if(/first|do|recommend|fix|intervention|action/.test(t))return IR.slice(0,3).map((v,i)=>`${i+1}. ${v.n} (net ₹${f(v.net,1)} L)`).join(" ")+".";
+ if(/where|dept|department|hotspot/.test(t))return DT.map(d=>`${d.n} ${f(d.at*100,1)}% (${d.top})`).join(", ")+".";
+ if(/cost|money|loss|save/.test(t))return `Attrition cost about ₹${f(COSTL)} L this year (1.5× salary per leaver). The best intervention returns ₹${f(IR[0].sav,1)} L in savings.`;
+ if(/who|risk|employee/.test(t))return AR.slice(0,5).map(e=>`${e.id} (${e.dept}, ${f(e.p*100)}%)`).join(", ")+" are the highest-priority at-risk employees.";
+ return "Try asking why people leave, where the hotspots are, what HR should do first, what it costs, or who is at risk."}
+const go=()=>{const q=document.getElementById("q");document.getElementById("ans").innerHTML=`<p><b>Q:</b> ${q.value.replace(/</g,"&lt;")}<br>${ans(q.value)}</p>`};
+document.getElementById("ask").onclick=go;document.getElementById("q").onkeydown=e=>{if(e.key=="Enter")go()};
+render();
+</script></body></html>
